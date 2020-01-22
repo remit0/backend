@@ -1,0 +1,5 @@
+django
+djangorestframework
+sqlalchemy
+psycopg2-binary
+python-dotenv
