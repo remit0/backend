@@ -21,11 +21,21 @@ class UserList(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    def get_queryset(self):
+        username = self.request.query_params.get('username', None)
+        if username is not None:
+            return User.objects.filter(username=username)
+        return User.objects.all()
+
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    def put(self, request, *args, **kwargs):
+        partial = self.request.query_params.get('partial', False)
+        return self.update(request, partial=partial, *args, **kwargs)
 
 
 class ProductList(generics.ListCreateAPIView):
