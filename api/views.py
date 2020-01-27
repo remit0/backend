@@ -5,8 +5,9 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Product
-from .serializers import ProductSerializer, UserSerializer
+from .models import Product, Rating
+from .serializers import ProductSerializer, UserSerializer, RatingSerializer
+from .permissions import IsOwner
 
 
 class CustomObtainAuthToken(ObtainAuthToken):
@@ -18,7 +19,6 @@ class CustomObtainAuthToken(ObtainAuthToken):
 
 
 class UserList(generics.ListCreateAPIView):
-    queryset = User.objects.all()
     serializer_class = UserSerializer
 
     def get_queryset(self):
@@ -48,3 +48,20 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+
+class RatingList(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = RatingSerializer
+
+    def get_queryset(self):
+        return Rating.objects.filter(user=self.request.user)
+
+
+class RatingDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, IsOwner]
+    queryset = Rating.objects.all()
+    serializer_class = RatingSerializer
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, partial=True, *args, **kwargs)

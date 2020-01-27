@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Product
+from .models import Product, Rating
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -9,6 +9,13 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['name', 'year', 'vol', 'type']
+
+
+class RatingSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Rating
+        fields = ['user', 'product', 'rating', 'date']
 
 
 class UserSerializer(serializers.ModelSerializer):
