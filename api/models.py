@@ -41,3 +41,11 @@ class Rating(models.Model):
 
     def __str__(self):
         return f"{self.user.username} ({self.user.id}): {self.product.name} :{self.rating}"
+
+    def as_dict(self):
+        return {
+            'user': self.user.id,
+            'product': self.product.id,
+            'rating': self.rating,
+            'date': str(self.date.date())
+        }

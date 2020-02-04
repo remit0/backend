@@ -57,6 +57,17 @@ class RatingList(generics.ListCreateAPIView):
     def get_queryset(self):
         return Rating.objects.filter(user=self.request.user)
 
+    def create(self, request, *args, **kwargs):
+        token = request.META.get('HTTP_AUTHORIZATION').replace("Token ", "")
+        data = request.data.dict()
+        data["user"] = Token.objects.get(key=token).user_id
+        serializer = self.serializer_class(data=data)
+        if serializer.is_valid(raise_exception=False):
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response('Invalid request')
+
 
 class RatingDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, IsOwner]
