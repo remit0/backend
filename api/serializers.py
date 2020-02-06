@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User
-from django.http import JsonResponse
 from rest_framework import serializers
 
 from .models import Product, Rating
@@ -9,24 +8,16 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['name', 'year', 'vol', 'type']
-
-
-class ListRatingSerializer(serializers.ListSerializer):
-
-    def update(self, instance, validated_data):
-        pass
-
-    def to_representation(self, data):
-        return JsonResponse([rating.as_dict() for rating in data], safe=False)
+        fields = ['name', 'year', 'store', 'type']
 
 
 class RatingSerializer(serializers.ModelSerializer):
 
+    product = ProductSerializer()
+
     class Meta:
         model = Rating
-        fields = ['user', 'product', 'rating', 'date']
-        list_serializer_class = ListRatingSerializer
+        fields = ['rating', 'product', 'date', 'user']
 
 
 class UserSerializer(serializers.ModelSerializer):

@@ -15,7 +15,7 @@ class UserList(generics.ListCreateAPIView):
     permission_classes = [IsPostOrIsAuthenticated]
 
     def get_queryset(self):
-        username = self.request.query_params.get('username', None)
+        username = self.request.query_params.get()
         if username is not None:
             return User.objects.filter(username=username)
         return User.objects.all()
@@ -36,13 +36,24 @@ class RatingList(generics.ListCreateAPIView):
     def get_queryset(self):
         return Rating.objects.filter(user=self.request.user)
 
-    def create(self, request, *args, **kwargs):
-        token = request.META.get('HTTP_AUTHORIZATION').replace("Token ", "")
-        data = request.data.dict()
-        data["user"] = Token.objects.get(key=token).user_id
-        serializer = self.serializer_class(data=data)
-        if serializer.is_valid(raise_exception=False):
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response('Invalid request')
+    def post(self, request, *args, **kwargs):
+        try:
+            token = request.META.get("HTTP_AUTHORIZATION").replace("Token ", "")
+            user_id = Token.objects.get(key=token).user_id
+            user = User.objects.get(id=user_id)
+
+            name = request.data.get("name")
+            year = request.data.get("year", default=-1)
+            store = request.data.get("store", default="-")
+            rating = request.data.get("rating")
+
+            new_product = Product(name=name, year=year, store=store)
+            new_product.save()
+            product_rating = Rating(user=user, product=new_product, rating=rating)
+            product_rating.save()
+
+            return Response("Succeeded")
+
+        except Exception as e:
+            print(e)
+            return Response("Invalid request")

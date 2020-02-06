@@ -3,7 +3,16 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
+class ProductManager(models.Manager):
+
+    def get_by_natural_key(self, name, year, type, store):
+        return self.get(name=name, year=year, type=type, store=store)
+
+
 class Product(models.Model):
+
+    class Meta:
+        unique_together = [['name', 'year', 'type', 'store']]
 
     type_choices = [
         ('-', '-'),
@@ -30,6 +39,9 @@ class Product(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+
+    def natural_key(self):
+        return self.name, self.year, self.type, self.store
 
 
 class Rating(models.Model):
