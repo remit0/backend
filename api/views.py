@@ -9,26 +9,26 @@ from .permissions import IsPostOrIsAuthenticated
 from .serializers import ProductSerializer, UserSerializer, RatingSerializer
 
 
-class UserList(generics.ListCreateAPIView):
+class UserView(generics.ListCreateAPIView):
 
     serializer_class = UserSerializer
     permission_classes = [IsPostOrIsAuthenticated]
 
     def get_queryset(self):
-        username = self.request.query_params.get()
+        username = self.request.query_params.get(key="username")
         if username is not None:
             return User.objects.filter(username=username)
         return User.objects.all()
 
 
-class ProductList(generics.ListCreateAPIView):
+class ProductView(generics.ListCreateAPIView):
 
     permission_classes = [IsAuthenticated]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
 
-class RatingList(generics.ListCreateAPIView):
+class RatingView(generics.ListCreateAPIView, generics.DestroyAPIView):
 
     permission_classes = [IsAuthenticated]
     serializer_class = RatingSerializer
@@ -38,22 +38,33 @@ class RatingList(generics.ListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         try:
-            token = request.META.get("HTTP_AUTHORIZATION").replace("Token ", "")
-            user_id = Token.objects.get(key=token).user_id
-            user = User.objects.get(id=user_id)
-
+            # required
+            user = User.objects.get(id=self.request.user.id)
             name = request.data.get("name")
-            year = request.data.get("year", default=-1)
-            store = request.data.get("store", default="-")
-            rating = request.data.get("rating")
-
-            new_product = Product(name=name, year=year, store=store)
-            new_product.save()
-            product_rating = Rating(user=user, product=new_product, rating=rating)
-            product_rating.save()
-
-            return Response("Succeeded")
+            value = request.data.get("value")
+            # optional
+            year = request.data.get("year")
+            store = request.data.get("store")
+            comment = request.data.get("comment")
+            type = request.data.get("type")
+            vol = request.data.get("vol")
+            # processing args
+            product = Product(name=name, year=year, store=store, type=type, vol=vol)
+            product.save()
+            rating = Rating(user=user, product=product, value=value, comment=comment)
+            rating.save()
+            return Response("Successfully added the new rating !")
 
         except Exception as e:
             print(e)
-            return Response("Invalid request")
+            return Response("Could not add the new rating.")
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            rating_id = request.data.get("id")
+            Rating.objects.get(id=rating_id).delete()
+            return Response(f"Successfully deleted the rating with id {rating_id}")
+
+        except Exception as e:
+            print(e)
+            return Response("Could not delete the rating.")

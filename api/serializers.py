@@ -8,7 +8,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['name', 'year', 'store', 'type']
+        fields = ['name', 'year', 'store', 'type', 'vol']
 
 
 class RatingSerializer(serializers.ModelSerializer):
@@ -17,7 +17,7 @@ class RatingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Rating
-        fields = ['rating', 'product', 'date', 'user']
+        fields = ['rating', 'product', 'date', 'user', 'id', 'comment']
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -26,7 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'password']
+        fields = ['username', 'password']
 
     def create(self, validated_data):
         user = User.objects.create(username=validated_data['username'])
