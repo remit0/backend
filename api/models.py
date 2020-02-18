@@ -16,6 +16,10 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+    @staticmethod
+    def get_attributes():
+        return ["name", "year", "vol", "type", "store"]
+
 
 class Rating(models.Model):
     # required
@@ -29,3 +33,7 @@ class Rating(models.Model):
 
     def __str__(self):
         return f"{self.product.name}: {self.value} ({self.user.username})"
+
+    @staticmethod
+    def get_attributes():
+        return ["user", "product", "value", "date", "comment"]

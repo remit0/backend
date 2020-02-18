@@ -3,7 +3,6 @@ from rest_framework import generics
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
 from .models import Product, Rating
 from .permissions import IsPostOrIsAuthenticated
 from .serializers import ProductSerializer, UserSerializer, RatingSerializer
@@ -28,7 +27,7 @@ class ProductView(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
 
 
-class RatingView(generics.ListCreateAPIView, generics.DestroyAPIView):
+class RatingView(generics.ListCreateAPIView, generics.DestroyAPIView, generics.UpdateAPIView):
 
     permission_classes = [IsAuthenticated]
     serializer_class = RatingSerializer
@@ -68,3 +67,29 @@ class RatingView(generics.ListCreateAPIView, generics.DestroyAPIView):
         except Exception as e:
             print(e)
             return Response("Could not delete the rating.")
+
+    def put(self, request, *args, **kwargs):
+        try:
+            product_attributes = [key for key in request.data.keys() if key in Product.get_attributes()]
+            rating_attributes = [key for key in request.data.keys() if key in Rating.get_attributes()]
+            rating = Rating.objects.get(id=request.data.get(key="id"))
+            if rating_attributes:
+                for attribute in rating_attributes:
+                    val = request.data.get(key=attribute)
+                    if attribute == "value":
+                        val = int(float(val))
+                    setattr(rating, attribute, val)
+                rating.save()
+            if product_attributes:
+                product = rating.product
+                for attribute in product_attributes:
+                    setattr(product, attribute, request.data.get(key=attribute))
+                product.save()
+            return Response(f"Successfully updated")
+
+        except Exception as e:
+            print(e)
+            return Response("Could not update the rating.")
+
+    def patch(self, request, *args, **kwargs):
+        raise NotImplementedError
