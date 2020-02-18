@@ -1,14 +1,14 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Product, Rating
+from .models import Product, Rating, Image
 
 
 class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['name', 'year', 'store', 'type', 'vol']
+        fields = ['name', 'year', 'store', 'type', 'vol', 'id']
 
 
 class RatingSerializer(serializers.ModelSerializer):
@@ -40,3 +40,10 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         super().update(instance, validated_data)
         return instance
+
+
+class ImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Image
+        fields = ["image", "product"]

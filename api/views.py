@@ -1,11 +1,13 @@
 from django.contrib.auth.models import User
 from rest_framework import generics
-from rest_framework.authtoken.models import Token
+from rest_framework import status
+from rest_framework.parsers import FileUploadParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .models import Product, Rating
+
+from .models import Product, Rating, Image
 from .permissions import IsPostOrIsAuthenticated
-from .serializers import ProductSerializer, UserSerializer, RatingSerializer
+from .serializers import ProductSerializer, UserSerializer, RatingSerializer, ImageSerializer
 
 
 class UserView(generics.ListCreateAPIView):
@@ -93,3 +95,28 @@ class RatingView(generics.ListCreateAPIView, generics.DestroyAPIView, generics.U
 
     def patch(self, request, *args, **kwargs):
         raise NotImplementedError
+
+
+class ImageView(generics.CreateAPIView, generics.RetrieveAPIView):
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = ImageSerializer
+    parser_classes = [MultiPartParser, FileUploadParser]
+
+    def post(self, request, *args, **kwargs):
+
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response("Success", status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, *args, **kwargs):
+        image = Image.objects.filter(product__id=request.data.get("id")).first()
+        serializer = self.serializer_class(image)
+        return Response(serializer.data, status.HTTP_200_OK)
+
+    # TODO : PUT, DELETE
+xz

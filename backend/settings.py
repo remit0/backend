@@ -133,3 +133,6 @@ REST_FRAMEWORK = {
        'rest_framework.authentication.TokenAuthentication',
    ),
 }
+
+MEDIA_URL = "/"
+MEDIA_ROOT = os.getenv("MEDIA_ROOT")

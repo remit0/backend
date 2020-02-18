@@ -37,3 +37,12 @@ class Rating(models.Model):
     @staticmethod
     def get_attributes():
         return ["user", "product", "value", "date", "comment"]
+
+
+class Image(models.Model):
+
+    image = models.ImageField(blank=False, null=True)
+    product = models.OneToOneField(Product, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.image.name

@@ -2,4 +2,4 @@ django
 djangorestframework
 python-dotenv
 psycopg2
-python-dotenv
+Pillow
