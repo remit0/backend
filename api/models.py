@@ -42,7 +42,7 @@ class Rating(models.Model):
 class Image(models.Model):
 
     image = models.ImageField(blank=False, null=True)
-    product = models.OneToOneField(Product, on_delete=models.CASCADE)
+    product = models.OneToOneField(Product, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.image.name

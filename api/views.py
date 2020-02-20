@@ -1,10 +1,12 @@
 from django.contrib.auth.models import User
+from django.http import FileResponse
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.parsers import FileUploadParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
+from backend.settings import MEDIA_ROOT
+import os
 from .models import Product, Rating, Image
 from .permissions import IsPostOrIsAuthenticated
 from .serializers import ProductSerializer, UserSerializer, RatingSerializer, ImageSerializer
@@ -114,9 +116,13 @@ class ImageView(generics.CreateAPIView, generics.RetrieveAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, *args, **kwargs):
-        image = Image.objects.filter(product__id=request.data.get("id")).first()
-        serializer = self.serializer_class(image)
-        return Response(serializer.data, status.HTTP_200_OK)
+        try:
+            image = Image.objects.filter(product__id=request.GET.get("id")).first()
+            serializer = self.serializer_class(image)
+            img = open(MEDIA_ROOT + serializer.data.get("image"), "rb")
+            return FileResponse(img, status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response("Failed", status.HTTP_400_BAD_REQUEST)
 
     # TODO : PUT, DELETE
-xz
